@@ -33,11 +33,11 @@ def process_pdf_path(pdf_path_list):
 def build_rag_chain_from_pdfs(folder_data):
     """Build a RAG chain from PDF files"""
     from langchain_community.document_loaders import PyPDFLoader
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
-    from langchain.vectorstores import FAISS
-    from langchain.embeddings import OpenAIEmbeddings
+    from langchain_text_splitters.character import RecursiveCharacterTextSplitter
+    from langchain_community.vectorstores import FAISS
+    from langchain_openai import ChatOpenAI, OpenAIEmbeddings
     from langchain.chains import RetrievalQA
-    from langchain.chat_models import ChatOpenAI
+    # from langchain.chat_models import ChatOpenAI
     
     try:
         # Handle different input formats
