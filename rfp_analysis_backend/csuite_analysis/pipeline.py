@@ -55,8 +55,9 @@ def build_rag_chain_from_pdfs(folder_data):
         # Case 2: folder_data is the raw folder data structure
         elif isinstance(folder_data, dict) and "body" in folder_data:
             pdf_files = extract_pdf_files(folder_data)
+            local_paths = process_pdf_path(pdf_files)
             
-            for pdf in pdf_files:
+            for pdf in local_paths:
                 try:
                     url = pdf.get("file_url")
                     if url:
