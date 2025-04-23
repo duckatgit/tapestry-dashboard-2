@@ -4,7 +4,7 @@ import axios from 'axios';
 export async function GET() {
   try {
     // Forward the request to your Django backend
-    const response = await axios.get('http://localhost:8000/api/csuite/folders/');
+    const response = await axios.get('https://tapesrtry-dashboard.mmopro.in/api/csuite/folders/');
     
     // Return the response from the backend
     return NextResponse.json(response.data);

@@ -118,7 +118,7 @@ export default function InfoMemDashboard() {
     try {
       console.log('Starting upload with Fetch API for files:', newFiles.map(f => f.name));
       
-      const response = await fetch('http://localhost:8004/api/v1/rfp/analyze-documents/', {
+      const response = await fetch('http://tapestry-dashboard-api.mmopro.in/api/v1/rfp/analyze-documents/', {
         method: 'POST',
         body: formData,
       });
@@ -259,7 +259,7 @@ export default function InfoMemDashboard() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:8004/api/v1/rfp/analyze-rfp/', {
+      const response = await fetch('http://tapestry-dashboard-api.mmopro.in/api/v1/rfp/analyze-rfp/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
