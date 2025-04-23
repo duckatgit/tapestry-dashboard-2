@@ -28,7 +28,7 @@ def check_model_limits():
         
         # Find GPT-4o in the list
         for model in models.data:
-            if "gpt-4o" in model.id:
+            if "gpt-4.1" in model.id:
                 print(f"Model: {model.id}")
                 print(f"Context window: {getattr(model, 'context_window', 'Not specified')}")
                 print(f"Max tokens: {getattr(model, 'max_tokens', 'Not specified')}")
