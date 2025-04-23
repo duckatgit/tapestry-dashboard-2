@@ -209,7 +209,7 @@ export default function AnalysisPage() {
     const fetchAnalysisData = async (sessionId: string) => {
       try {
         // First try the endpoint for information memorandum analysis
-        const response = await fetch(`http://tapestry-dashboard-api.mmopro.in/api/v1/rfp/analyze-rfp/`, {
+        const response = await fetch(`https://tapestry-dashboard-api.mmopro.in/api/v1/rfp/analyze-rfp/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -252,7 +252,7 @@ export default function AnalysisPage() {
           if (sessionIdFromParams) {
             try {
               console.log('Cleaning up session after 30 minutes:', sessionIdFromParams)
-              await fetch("http://tapestry-dashboard-api.mmopro.in/api/v1/rfp/cleanup-session/", {
+              await fetch("https://tapestry-dashboard-api.mmopro.in/api/v1/rfp/cleanup-session/", {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
@@ -280,7 +280,7 @@ export default function AnalysisPage() {
     if (sessionIdFromParams) {
       try {
         setIsLoading(true);
-        await fetch("http://tapestry-dashboard-api.mmopro.in/api/v1/rfp/cleanup-session/", {
+        await fetch("https://tapestry-dashboard-api.mmopro.in/api/v1/rfp/cleanup-session/", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -386,7 +386,7 @@ export default function AnalysisPage() {
       console.log('Sending request data:', requestData)
       
       // Update the URL to point to your backend server
-      const response = await fetch('http://tapestry-dashboard-api.mmopro.in/api/v1/rfp/chat/', {
+      const response = await fetch('https://tapestry-dashboard-api.mmopro.in/api/v1/rfp/chat/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
