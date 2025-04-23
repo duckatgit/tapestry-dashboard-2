@@ -32,7 +32,7 @@ def process_pdf_path(pdf_path_list):
 
 def build_rag_chain_from_pdfs(folder_data):
     """Build a RAG chain from PDF files"""
-    from langchain.document_loaders import PyPDFLoader
+    from langchain_community.document_loaders import PyPDFLoader
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     from langchain.vectorstores import FAISS
     from langchain.embeddings import OpenAIEmbeddings
