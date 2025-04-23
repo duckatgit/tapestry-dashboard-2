@@ -1,0 +1,357 @@
+query_template = """
+System: You are an expert Information Memorandum analyzer. Extract information from the Information Memorandum and return it ONLY as a valid JSON object. Do not include any additional text.
+
+When analyzing the document, pay attention to page numbers indicated by [Page X] prefixes in the text. Include these page references in your analysis by adding a 'source_page' field to each extracted piece of information.
+
+Documents:
+{% for doc in documents %}
+    {{ doc.content }}
+{% endfor %}
+
+Question: {{ query }}
+
+Return a JSON object with exactly this structure:
+
+{
+  "company_overview": {
+    "name": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "tagline": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "location": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "industry": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "subsidiaries": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "founding_year": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "business_model": {
+    "value": "",
+    "confidence": 0.0,
+    "is_interpreted": false,
+    "source_page": ""
+  },
+  "value_proposition": {
+    "main_value": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "for_b2b_marketers": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "for_talent_sourcing": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "product_portfolio": {
+    "saas_products": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "daas_products": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "ai_products": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "financial_advisor": {
+    "value": "",
+    "confidence": 0.0,
+    "is_interpreted": false,
+    "source_page": ""
+  },
+  "financial_highlights": {
+    "arr": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "revenue": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "bookings": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "gross_margin": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "renewal_rate": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "customer_metrics": {
+      "value": {},
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "future_projections": {
+      "value": {},
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "growth_opportunities": {
+    "organic_growth": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "inorganic_growth": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "international_expansion": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "product_expansion": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "investment_needs": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "market_analysis": {
+    "total_market_size": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "growth_rate": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "target_segments": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "geographical_breakdown": {
+      "value": {},
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "competitive_landscape": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "strategy": {
+    "exit_strategy": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "timeline": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "product_strategy": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "market_expansion": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "ai_roadmap": {
+      "value": {},
+      "confidence": 0.0, 
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "key_clients": {
+    "value": [],
+    "confidence": 0.0,
+    "is_interpreted": false,
+    "source_page": ""
+  },
+  "leadership_team": [
+    {
+      "name": {
+        "value": "",
+        "confidence": 0.0,
+        "is_interpreted": false,
+        "source_page": ""
+      },
+      "role": {
+        "value": "",
+        "confidence": 0.0,
+        "is_interpreted": false,
+        "source_page": ""
+      },
+      "expertise": {
+        "value": "",
+        "confidence": 0.0,
+        "is_interpreted": false,
+        "source_page": ""
+      },
+      "background": {
+        "value": "",
+        "confidence": 0.0,
+        "is_interpreted": false,
+        "source_page": ""
+      }
+    }
+  ],
+  "funding_objective": {
+    "amount_sought": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "use_of_funds": {
+      "value": [],
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    }
+  },
+  "contact_details": {
+    "company_address": {
+      "value": "",
+      "confidence": 0.0,
+      "is_interpreted": false,
+      "source_page": ""
+    },
+    "key_contacts": [
+      {
+        "name": {
+          "value": "",
+          "confidence": 0.0,
+          "is_interpreted": false,
+          "source_page": ""
+        },
+        "role": {
+          "value": "",
+          "confidence": 0.0,
+          "is_interpreted": false,
+          "source_page": ""
+        },
+        "email": {
+          "value": "",
+          "confidence": 0.0,
+          "is_interpreted": false,
+          "source_page": ""
+        },
+        "phone": {
+          "value": "",
+          "confidence": 0.0,
+          "is_interpreted": false,
+          "source_page": ""
+        }
+      }
+    ]
+  }
+}
+
+For each field:
+1. Set "value" to the extracted information from the Information Memorandum
+2. Set "confidence" to a value between 0.0 and 1.0 indicating your confidence in the extraction
+3. Set "is_interpreted" to true if you had to interpret or infer the information rather than directly extract it
+4. Set "source_page" to the page number(s) where you found this information (e.g., "5" or "5, 7")
+
+If information is explicitly stated in the Information Memorandum, set confidence high (0.8-1.0) and is_interpreted to false.
+If information is implied but not explicitly stated, provide your best interpretation, set confidence lower (0.4-0.7), and set is_interpreted to true.
+If you're making an educated guess based on context, set confidence even lower (0.1-0.3) and set is_interpreted to true.
+If information is completely absent, leave value as empty string or empty array, set confidence to 0.0, and is_interpreted to false.
+
+For example:
+- If the IM clearly states "Rhetorik was founded in 2014" on page 3, set {"value": "2014", "confidence": 1.0, "is_interpreted": false, "source_page": "3"}
+- If the IM mentions "expanding operations into European markets" on pages 8 and 15 but doesn't explicitly state international expansion plans, set {"value": "European market expansion", "confidence": 0.6, "is_interpreted": true, "source_page": "8, 15"}
+- If there's no mention of patents or IP, leave as {"value": "", "confidence": 0.0, "is_interpreted": false, "source_page": ""}
+
+For array values, each item should be a string, not an object. For example:
+"key_clients": {
+  "value": ["IBM", "Workday", "RingCentral", "Square", "McKinsey", "Accenture", "ZoomInfo", "Randstad", "Dun & Bradstreet"],
+  "confidence": 0.9,
+  "is_interpreted": false,
+  "source_page": "6"
+}
+
+For object values like customer_metrics or future_projections, structure the data appropriately as nested key-value pairs.
+"""

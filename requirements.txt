@@ -1,0 +1,13 @@
+asgiref==3.8.1
+Django==5.1.6
+django_haystack==3.3.0
+djangorestframework==3.15.2
+elasticsearch==8.17.2
+numpy==2.2.4
+openai==1.66.5
+openpyxl==3.1.5
+pandas==2.2.3
+pinecone==6.0.2
+PyPDF2==3.0.1
+python-dotenv==1.0.1
+Requests==2.32.3
