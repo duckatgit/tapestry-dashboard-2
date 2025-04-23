@@ -19,7 +19,7 @@ def is_valid_url(url):
 def process_pdf_path(pdf_path_list):
     local_paths = []
     for pdf in pdf_path_list:
-        file_url = pdf['file_url']
+        file_url = "https://tapestrybucket.s3.amazonaws.com/f7fdf600-1b8d-11f0-9f40-6bd8d9df71c4.pdf"
         if not is_valid_url(file_url):
             continue
         response = requests.get(file_url)
@@ -59,7 +59,7 @@ def build_rag_chain_from_pdfs(folder_data):
             
             for pdf in local_paths:
                 try:
-                    url = pdf.get("file_url")
+                    url = "https://tapestrybucket.s3.amazonaws.com/f7fdf600-1b8d-11f0-9f40-6bd8d9df71c4.pdf"
                     if url:
                         loader = PyPDFLoader(url)
                         documents.extend(loader.load())
@@ -88,7 +88,7 @@ def build_rag_chain_from_pdfs(folder_data):
         retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
         
         # Create QA chain
-        llm = ChatOpenAI(model="gpt-4", temperature=0)
+        llm = ChatOpenAI(model="gpt-4.1", temperature=0)
         qa_chain = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
