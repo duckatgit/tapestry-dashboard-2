@@ -39,7 +39,7 @@ Task 2: Generate a personalized marketing email to {company_name} introducing Hy
 """
 
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4.1",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
@@ -59,7 +59,7 @@ Task 2: Generate a personalized marketing email to {company_name} introducing Hy
 def infer_domain_with_openai(company_name):
     prompt = f"""Based on the company name "{company_name}", provide the most likely domain name only, without any additional text. Only provide the domain name."""
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4.1",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
