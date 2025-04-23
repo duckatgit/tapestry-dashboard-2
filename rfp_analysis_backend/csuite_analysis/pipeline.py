@@ -24,8 +24,9 @@ def process_pdf_path(pdf_path_list):
             continue
         response = requests.get(file_url)
         if response.status_code == 200:
-            # temp_path = os.path.join('/tmp', pdf['file_name'])
-            temp_path = pdf['file_name']
+            temp_path = os.path.join('/tmp', pdf['file_name'])
+            print(temp_path, 'temp_path')
+            # temp_path = pdf['file_name']
             with open(temp_path, 'wb') as f:
                 f.write(response.content)
             local_paths.append(temp_path)
