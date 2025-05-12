@@ -23,7 +23,7 @@ export interface Contact {
   }
   
   // Base URL for the API - use localhost for local development
-  const API_BASE_URL = "http://localhost:8004";
+  const API_BASE_URL = "https://tapestry-dashboard-api.mmopro.in";
   
   export const fetchCompanyData = async (companyNumber: string): Promise<CompanyData> => {
     try {

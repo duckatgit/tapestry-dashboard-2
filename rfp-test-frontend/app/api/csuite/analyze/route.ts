@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     // Get the request body
     const body = await request.json();
-    const djangoBackendUrl = 'http://localhost:8004/api/csuite/analyze/'; // Ensure this port is correct
+    const djangoBackendUrl = 'https://tapestry-dashboard-api.mmopro.in/api/csuite/analyze/';
 
     // Forward the request to your Django backend using fetch
     const djangoResponse = await fetch(djangoBackendUrl, {
