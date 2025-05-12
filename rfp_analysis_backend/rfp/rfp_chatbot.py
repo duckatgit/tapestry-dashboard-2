@@ -67,7 +67,7 @@ class RFPChatbot:
 
             # Generate response
             response = self.client.chat.completions.create(
-                model="gpt-4.1",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are an expert Information Memorandum analyst assistant. Answer questions about the Information Memorandum using the provided context. Be concise and specific."},
                     {"role": "user", "content": f"Context: {context}\n\nQuestion: {question}"}

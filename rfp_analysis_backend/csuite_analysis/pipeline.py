@@ -19,14 +19,12 @@ def is_valid_url(url):
 def process_pdf_path(pdf_path_list):
     local_paths = []
     for pdf in pdf_path_list:
-        file_url = "https://tapestrybucket.s3.amazonaws.com/f7fdf600-1b8d-11f0-9f40-6bd8d9df71c4.pdf"
+        file_url = pdf['file_url']
         if not is_valid_url(file_url):
             continue
         response = requests.get(file_url)
-        if response.status_code == 200: 
+        if response.status_code == 200:
             temp_path = os.path.join('/tmp', pdf['file_name'])
-            print(temp_path, 'temp_path')
-            # temp_path = pdf['file_name']
             with open(temp_path, 'wb') as f:
                 f.write(response.content)
             local_paths.append(temp_path)
@@ -34,12 +32,12 @@ def process_pdf_path(pdf_path_list):
 
 def build_rag_chain_from_pdfs(folder_data):
     """Build a RAG chain from PDF files"""
-    from langchain_community.document_loaders import PyPDFLoader
-    from langchain_text_splitters.character import RecursiveCharacterTextSplitter
-    from langchain_community.vectorstores import FAISS
-    from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+    from langchain.document_loaders import PyPDFLoader
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    from langchain.vectorstores import FAISS
+    from langchain.embeddings import OpenAIEmbeddings
     from langchain.chains import RetrievalQA
-    # from langchain.chat_models import ChatOpenAI
+    from langchain.chat_models import ChatOpenAI
     
     try:
         # Handle different input formats
@@ -57,11 +55,10 @@ def build_rag_chain_from_pdfs(folder_data):
         # Case 2: folder_data is the raw folder data structure
         elif isinstance(folder_data, dict) and "body" in folder_data:
             pdf_files = extract_pdf_files(folder_data)
-            local_paths = process_pdf_path(pdf_files)
             
-            for pdf in local_paths:
+            for pdf in pdf_files:
                 try:
-                    url = "https://tapestrybucket.s3.amazonaws.com/f7fdf600-1b8d-11f0-9f40-6bd8d9df71c4.pdf"
+                    url = pdf.get("file_url")
                     if url:
                         loader = PyPDFLoader(url)
                         documents.extend(loader.load())

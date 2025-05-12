@@ -73,7 +73,7 @@ const ChatPopup = forwardRef(function ChatPopup(
     try {
       setChatHistory(prev => [...prev, { type: 'bot', content: '...' }])
 
-      const response = await fetch('https://tapestry-dashboard-api.mmopro.in/api/v1/rfp/chat/', {
+      const response = await fetch('http://127.0.0.1:8004/api/v1/rfp/chat/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

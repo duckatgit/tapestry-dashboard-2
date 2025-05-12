@@ -168,7 +168,7 @@ class RFPAnalyzer:
                 "llm",
                 OpenAIGenerator(
                     api_key=Secret.from_token(self.api_key),
-                    model="gpt-4.1",
+                    model="gpt-4o",
                     generation_kwargs={
                         "max_tokens": 16384,
                         "timeout": 180

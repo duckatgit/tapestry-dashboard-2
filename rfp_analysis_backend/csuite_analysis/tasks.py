@@ -10,49 +10,34 @@ import json # Add json import
 
 def run_agent_analysis(questions=None, folder=None):
     from .questions import IC_Questions  # keep this import here for default fallback
-    from .dummy_data import folder_list_raw_dummy
-
-    # Use provided values or fallback
-    question_list = questions if questions else IC_Questions
-    total_questions = len(question_list)
     
-    # Check if folder is a path string or the dummy data
-    if isinstance(folder, dict):
-        if 'path' in folder and os.path.exists(folder['path']):
-            # It's a folder object with a valid path
-            folder_path = folder['path']
-            pdf_files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) 
-                        if f.lower().endswith('.pdf')]
-            
-            if pdf_files:
-                print(f"Found {len(pdf_files)} PDF files in {folder_path}")
-                rag_chain = build_rag_chain_from_pdfs(pdf_files)
-            else:
-                print(f"No PDF files found in {folder_path}")
-                rag_chain = build_rag_chain_from_pdfs(folder_list_raw_dummy)
-        else:
-            # Use the dummy data
-            print("Using dummy data for RAG chain")
-            rag_chain = build_rag_chain_from_pdfs(folder_list_raw_dummy)
-    elif isinstance(folder, str) and os.path.exists(folder):
-        # It's a direct path string
-        if os.path.isdir(folder):
-            pdf_files = [os.path.join(folder, f) for f in os.listdir(folder) 
-                        if f.lower().endswith('.pdf')]
-        else:
-            # It's a direct file path
-            pdf_files = [folder] if folder.lower().endswith('.pdf') else []
-            
-        if pdf_files:
-            print(f"Using {len(pdf_files)} PDF files for analysis")
-            rag_chain = build_rag_chain_from_pdfs(pdf_files)
-        else:
-            print("No PDF files found, using dummy data")
-            rag_chain = build_rag_chain_from_pdfs(folder_list_raw_dummy)
-    else:
-        # Use the dummy data as fallback
-        print("Using dummy data (fallback) for RAG chain")
-        rag_chain = build_rag_chain_from_pdfs(folder_list_raw_dummy)
+    if questions is None:
+        questions = IC_Questions
+
+    # Extract PDF files from Tapestry folder data
+    pdf_files = []
+    if folder and isinstance(folder, dict):
+        docs = folder.get("body", {}).get("docs", [])
+        for doc in docs:
+            if doc.get("file_type", "").lower() == "pdf":
+                name = doc.get("Document_name")
+                url = doc.get("file_id")
+                if name and url:
+                    pdf_files.append({
+                        "file_name": name,
+                        "file_type": "pdf",
+                        "file_url": url
+                    })
+    
+    if not pdf_files:
+        yield json.dumps({"type": "error", "message": "No PDF files found in folder"})
+        return
+
+    # Build RAG chain from PDFs
+    rag_chain = build_rag_chain_from_pdfs(pdf_files)
+    if not rag_chain:
+        yield json.dumps({"type": "error", "message": "Failed to build RAG chain"})
+        return
 
     # Init tools
     rag = rag_tool(rag_chain)
@@ -67,52 +52,87 @@ def run_agent_analysis(questions=None, folder=None):
 
     final_json_output = {}
     context_store = {}
+    total_questions = len(questions)
 
-    for idx, question in enumerate(question_list):
-        current_question_num = idx + 1
-        yield json.dumps({"type": "progress", "current": current_question_num, "total": total_questions})
+    for idx, question in enumerate(questions):
+        # Send progress update
+        yield json.dumps({
+            "type": "progress",
+            "current": idx + 1,
+            "total": total_questions
+        })
+
         try:
+            # Step 1: RAG Tool
             rag_response = rag(question)
+            
+            # Step 2: Web Validation
             web_response = web(question)
-
+            
+            # Step 3: Analyst Appraisal
             prior_context = ""
             if context_store:
                 safe_context = []
                 for i, item in enumerate(list(context_store.items())[-2:]):
-                    q_prev, r_prev = item
-                    if isinstance(q_prev, str) and isinstance(r_prev, dict):
-                        rag_snip = r_prev.get("step_1", {}).get("step_output", "")[:1000]
-                        web_snip = r_prev.get("step_2", {}).get("step_output", "")[:1000]
-                        safe_context.append(f"Q{i+1}: {q_prev}\nRAG: {rag_snip}\nWEB: {web_snip}")
+                    if isinstance(item, tuple) and len(item) == 2:
+                        q_prev, r_prev = item
+                        if isinstance(q_prev, str) and isinstance(r_prev, dict):
+                            rag_snip = r_prev.get("step_1", {}).get("step_output", "")[:1000]
+                            web_snip = r_prev.get("step_2", {}).get("step_output", "")[:1000]
+                            safe_context.append(f"Q{i+1}: {q_prev}\nRAG: {rag_snip}\nWEB: {web_snip}")
                 prior_context = "\n\n".join(safe_context)
 
-            appraisal_output = analyst(question, rag_response, web_response, prior_context)
+            appraisal_output = analyst(
+                question=question,
+                rag_response=rag_response,
+                web_response=web_response,
+                context=prior_context
+            )
 
-            # Add this right after getting the appraisal output
-            print(f"Question {idx+1} appraisal starts with: {appraisal_output[:100]}...")
+            # Parse appraisal output
+            try:
+                parsed_appraisal = output_parser.parse(appraisal_output)
+            except Exception as e:
+                parsed_appraisal = {
+                    "score": None,
+                    "scoring": appraisal_output,
+                    "sources": {},
+                    "agent_commentary": f"Parsing failed: {str(e)}"
+                }
 
-            # Extract sections from the analyst output
-            parsed_sections = extract_sections_from_appraisal(appraisal_output)
-            score = parsed_sections["score"]
-            parsed_appraisal = {
-                "score": score,
-                "scoring": parsed_sections["scoring"],
-                "sources": {},
-                "agent_commentary": parsed_sections["agent_commentary"]
-            }
+            # Handle source parsing
+            raw_sources = parsed_appraisal.get("sources", "")
+            source_dict = {}
+            if isinstance(raw_sources, str):
+                for line in raw_sources.strip().split("\n"):
+                    if line:
+                        if "http" in line:
+                            try:
+                                name, url = line.rsplit("(", 1)
+                                source_dict[name.strip()] = url.strip("() ")
+                            except:
+                                source_dict[line.strip()] = None
+                        else:
+                            source_dict[line.strip()] = None
+            elif isinstance(raw_sources, list):
+                for src in raw_sources:
+                    if isinstance(src, dict) and "title" in src and "location" in src:
+                        source_dict[src["title"]] = src["location"]
 
+            # Store results
             final_json_output[f"question_{idx+1}"] = {
                 "question_text": question,
-                "score": score,
+                "score": int(parsed_appraisal.get("score") or 0),
                 "scoring": parsed_appraisal.get("scoring", ""),
-                "sources": parsed_appraisal.get("sources", {}),
+                "sources": source_dict,
                 "rationale": {
                     "rag_response": rag_response,
                     "web_response": web_response,
-                    "agent_commentary": safe_parse_agent_commentary(parsed_appraisal.get("agent_commentary"))
+                    "agent_commentary": parsed_appraisal.get("agent_commentary", "")
                 }
             }
 
+            # Update context
             context_store[question] = {
                 "step_1": {"step_output": rag_response},
                 "step_2": {"step_output": web_response},

@@ -1169,7 +1169,7 @@ def check_model_limits(request):
         model_info = {}
         # Find GPT-4o in the list
         for model in models.data:
-            if "gpt-4.1" in model.id:  # Get all GPT-4 variants
+            if "gpt-4" in model.id:  # Get all GPT-4 variants
                 model_info[model.id] = {
                     "context_window": getattr(model, 'context_window', 'Not specified'),
                     "max_tokens": getattr(model, 'max_tokens', 'Not specified')

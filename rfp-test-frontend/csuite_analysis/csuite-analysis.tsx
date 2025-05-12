@@ -2,7 +2,14 @@
 
 'use client'
 
-import React, { useState, useEffect } from 'react';
+/// <reference types="react" />
+/// <reference types="@mui/material" />
+/// <reference types="@mui/icons-material/ExpandMore" />
+/// <reference types="react-markdown" />
+/// <reference types="axios" />
+/// <reference types="next/link" />
+
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { 
   Box, 
   Button, 
@@ -23,6 +30,34 @@ import ReactMarkdown from 'react-markdown';
 import axios from 'axios';
 import Link from 'next/link';
 
+// Types
+interface Folder {
+  id: string;
+  name: string;
+  path?: string;
+}
+
+interface AnalysisResult {
+  question_text: string;
+  score: number;
+  scoring: string;
+  sources: Record<string, string | null>;
+  rationale: {
+    rag_response: string;
+    web_response: string;
+    agent_commentary: string;
+  };
+}
+
+interface AnalysisResults {
+  [key: string]: AnalysisResult;
+}
+
+interface ProgressState {
+  current: number;
+  total: number;
+}
+
 // Default questions from your backend
 const DEFAULT_QUESTIONS = [
   "What is the name of the company under consideration? Who is the CEO of the company? Have they successfully led companies before?",
@@ -33,18 +68,66 @@ const DEFAULT_QUESTIONS = [
   "What is the website URL of the company?"
 ];
 
-const CSuiteAnalysisPage = () => {
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
-  const [analysisProgress, setAnalysisProgress] = useState({ current: 0, total: 0 });
-  const [questions, setQuestions] = useState(DEFAULT_QUESTIONS);
-  const [customQuestion, setCustomQuestion] = useState('');
-  const [selectedFolder, setSelectedFolder] = useState(null);
-  const [folders, setFolders] = useState([]);
+const CSuiteAnalysisPage: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [results, setResults] = useState<AnalysisResults | null>(null);
+  const [analysisProgress, setAnalysisProgress] = useState<ProgressState>({ current: 0, total: 0 });
+  const [questions, setQuestions] = useState<string[]>(DEFAULT_QUESTIONS);
+  const [customQuestion, setCustomQuestion] = useState<string>('');
+  const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [folderId, setFolderId] = useState<string>('');
+  const [folderIdError, setFolderIdError] = useState<string>('');
+
+  // Validate folder_id format
+  const validateFolderId = (input: string): boolean => {
+    try {
+      const parsed = JSON.parse(input);
+      if (parsed.org_id && parsed.name) {
+        setFolderIdError('');
+        return true;
+      }
+      setFolderIdError('Invalid format. Must include org_id and name');
+      return false;
+    } catch (e) {
+      setFolderIdError('Invalid JSON format');
+      return false;
+    }
+  };
+
+  // Handle folder_id input change
+  const handleFolderIdChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setFolderId(value);
+    if (value) {
+      validateFolderId(value);
+    } else {
+      setFolderIdError('');
+    }
+  };
+
+  // Handle folder_id submission
+  const handleFolderIdSubmit = async (): Promise<void> => {
+    if (!validateFolderId(folderId)) {
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/csuite/folders/', { folder_id: JSON.parse(folderId) });
+      const folderData = response.data.folders || [];
+      setFolders(folderData);
+      if (folderData.length > 0) {
+        setSelectedFolder(folderData[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching folder:', error);
+      setFolderIdError('Error fetching folder data');
+    }
+  };
 
   // Fetch available folders on component mount
   useEffect(() => {
-    const fetchFolders = async () => {
+    const fetchFolders = async (): Promise<void> => {
       try {
         const response = await axios.get('/api/csuite/folders/');
         const folderData = response.data.folders || [];
@@ -69,7 +152,7 @@ const CSuiteAnalysisPage = () => {
     fetchFolders();
   }, []);
 
-  const handleRunAnalysis = async () => {
+  const handleRunAnalysis = async (): Promise<void> => {
     if (!selectedFolder) {
       alert('Please select a folder first');
       return;
@@ -145,12 +228,11 @@ const CSuiteAnalysisPage = () => {
       setLoading(false);
       setAnalysisProgress({ current: 0, total: 0 }); // Reset progress on error
     } 
-    // Removed finally block as loading is set within the stream or catch
   };
 
   // Mock results generator function (for testing)
-  const generateMockResults = (questions) => {
-    const results = {};
+  const generateMockResults = (questions: string[]): AnalysisResults => {
+    const results: AnalysisResults = {};
     questions.forEach((question, index) => {
       results[`question_${index+1}`] = {
         question_text: question,
@@ -167,20 +249,20 @@ const CSuiteAnalysisPage = () => {
     return results;
   };
 
-  const handleAddCustomQuestion = () => {
+  const handleAddCustomQuestion = (): void => {
     if (customQuestion.trim()) {
       setQuestions([...questions, customQuestion.trim()]);
       setCustomQuestion('');
     }
   };
 
-  const handleRemoveQuestion = (index) => {
+  const handleRemoveQuestion = (index: number): void => {
     const updatedQuestions = [...questions];
     updatedQuestions.splice(index, 1);
     setQuestions(updatedQuestions);
   };
 
-  const getScoreColor = (score) => {
+  const getScoreColor = (score: number): string => {
     if (!score) return 'gray';
     if (score >= 4) return 'green';
     if (score >= 3) return 'orange';
@@ -188,11 +270,11 @@ const CSuiteAnalysisPage = () => {
   };
 
   // Calculate average score
-  const calculateAverageScore = () => {
+  const calculateAverageScore = (): number => {
     if (!results) return 0;
-    const scores = Object.values(results).map(item => item.score);
-    const sum = scores.reduce((acc, score) => acc + score, 0);
-    return (sum / scores.length).toFixed(1);
+    const scores = Object.values(results).map((item: AnalysisResult) => item.score);
+    const sum = scores.reduce((acc: number, score: number) => acc + score, 0);
+    return Number((sum / scores.length).toFixed(1));
   };
 
   return (
